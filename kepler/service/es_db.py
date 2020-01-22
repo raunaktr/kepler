@@ -64,6 +64,7 @@ def add_new_user(name, email, mobile, address, password):
             print("####################################")
             print(user_details_data)
             print("_____________________________________")
+            return "Created new user"
         else:
             return "Already exists"
     except Exception as e:
