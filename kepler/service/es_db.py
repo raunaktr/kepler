@@ -149,6 +149,78 @@ def check_email(email):
         return "Error occurred: ", str(e)
 
 
+#########################
+####edit user details####
+#########################
+def edit_user_details(user_id, name, email, phone, address):
+    try:
+        fetch_user = es.search(index='kepler_user_details', body={
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "user_id.keyword": user_id
+                            }
+                        }
+                    ]
+                }
+            }
+        })
+
+        fetched_user = fetch_user.get('hits').get('hits')
+        if len(fetched_user) != 0:
+            edit_details = es.update(index='kepler_user_details', id=user_id, body={
+                "doc": {
+                    "name": name,
+                    "email": email,
+                    "phone": phone,
+                    "address": address
+                }
+            })
+            return "Edit successful"
+        else:
+            return "Failed to receive"
+    except Exception as e:
+        traceback.print_exc()
+        return "Error occurred: ", str(e)
+
+
+#####################
+####Edit password####
+#####################
+def edit_password(user_id, password):
+    try:
+        fetch_user = es.search(index='kepler_auth', body={
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "user_id.keyword": user_id
+                            }
+                        }
+                    ]
+                }
+            }
+        })
+
+        fetched_user = fetch_user.get('hits').get('hits')
+
+        if len(fetched_user) != 0:
+            update_password = es.update(index='kepler_auth', id=user_id, body={
+                "doc": {
+                    "password": password
+                }
+            })
+            return "Edit successful"
+        else:
+            return "Failed"
+    except Exception as e:
+        traceback.print_exc()
+        return "Error occurred: ", str(e)
+
+
 ##############################
 ####delete user by user_id####
 ##############################
@@ -200,10 +272,42 @@ def delete_user(user_id):
             print("###########################")
             print("###########################")
             print(remove_user_from_auth)
-
+            return "Successfully removed!"
         else:
             return "Failed to delete"
             # to be worked upon
+    except Exception as e:
+        traceback.print_exc()
+        return "Error occurred: ", str(e)
+
+
+###############################
+####Get user_id using email####
+###############################
+def get_user_id(email):
+    try:
+        fetch_user_id = es.search(index='kepler_auth', body={
+            "query": {
+                "bool": {
+                    "must": [
+                        {
+                            "term": {
+                                "email.keyword": email
+                            }
+                        }
+                    ]
+                }
+            }
+        })
+        retrieved_user_id = fetch_user_id.get('hits').get('hits')
+
+        if len(retrieved_user_id != 0):
+            init_list = []
+            for i in retrieved_user_id:
+                init_list.append(i.get('_source'))
+            return init_list[0]['user_id']
+        else:
+            return "Failed to receive"
     except Exception as e:
         traceback.print_exc()
         return "Error occurred: ", str(e)

@@ -1,8 +1,10 @@
 from flask import Flask, request, jsonify
-from kepler.app.users.sign_in import sign_in_service
-from kepler.app.users.sign_up import sign_up_service
-from kepler.service import es_db
-import os
+from app.users.sign_in import sign_in_service
+from app.users.sign_up import sign_up_service
+from app.users.update_profile import edit_profile
+from app.users.update_password import edit_password
+from app.users.remove_user import delete_user
+
 import traceback
 
 app = Flask(__name__)
@@ -36,6 +38,41 @@ def sign_up():
     except Exception as e:
         traceback.print_exc()
         return "Error :", str(e)
+
+
+# Editing user profile
+@app.route('/update_profile', methods=['POST'])
+def update_profile():
+    try:
+        request_data = request.get_json()
+        data = edit_profile(request_data['user_id'], request_data['name'], request_data['email'], request_data['phone'],
+                            request_data['address'])
+        return jsonify(data)
+    except Exception as e:
+        traceback.print_exc()
+        return "Error occurred: ", str(e)
+
+
+# Update user password
+@app.route('/update_password', methods=['POST'])
+def update_password():
+    try:
+        request_data = request.get_json()
+        data = edit_password(request_data['user_id'], request_data['password'])
+        return jsonify(data)
+    except Exception as e:
+        return "Error occurred: ", str(e)
+
+
+# Delete User profile
+@app.route('/remove_profile', methods=['POST'])
+def remove_profile():
+    try:
+        request_data = request.get_json()
+        data = delete_user(request_data['user_id'])
+        return jsonify(data)
+    except Exception as e:
+        return "Error occurred: ", str(e)
 
 
 if __name__ == '__main__':
