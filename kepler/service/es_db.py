@@ -1,6 +1,7 @@
 from elasticsearch import Elasticsearch
 import uuid
 import traceback
+from kepler.app.utils import es_status
 
 # declaring Elasticsearch as object. more parameters to be introduced..
 es = Elasticsearch()
@@ -35,7 +36,8 @@ def add_new_user(name, email, mobile, address, password):
                 }
             }
         })
-
+        if es_status.status(auth_check) != "Successfully done!":
+            return "No error"
         # if user is found, printing(later to be removed line)
         # obtained result will be a dictionary of list of dictionary
         print(auth_check.get('hits').get('hits'))
@@ -96,6 +98,8 @@ def auth(email, password):
                 }
             }
         })
+        if es_status.status(auth_check) != "Successfully done!":
+            return "No error"
         auth_res = auth_check.get('hits').get('hits')
         print(auth_res)
 
@@ -130,7 +134,8 @@ def check_email(email):
                 }
             }
         })
-
+        if es_status.status(auth_check) != "Successfully done!":
+            return "No error"
         # if user is found, printing(later to be removed line)
         # obtained result will be a dictionary of list of dictionary
         print(auth_check.get('hits').get('hits'))
@@ -167,7 +172,8 @@ def edit_user_details(user_id, name, email, phone, address):
                 }
             }
         })
-
+        if es_status.status(fetch_user) != "Successfully done!":
+            return "No error"
         fetched_user = fetch_user.get('hits').get('hits')
         if len(fetched_user) != 0:
             edit_details = es.update(index='kepler_user_details', id=user_id, body={
@@ -204,7 +210,8 @@ def edit_password(user_id, password):
                 }
             }
         })
-
+        if es_status.status(fetch_user) != "Successfully done!":
+            return "No error"
         fetched_user = fetch_user.get('hits').get('hits')
 
         if len(fetched_user) != 0:
@@ -239,7 +246,8 @@ def delete_user(user_id):
                 }
             }
         })
-
+        if es_status.status(check_user) != "Successfully done!":
+            return "No error"
         obtained_user = check_user.get('hits').get('hits')
         if len(obtained_user) != 0:
             remove_user_from_user_detail = es.delete_by_query(index='kepler_user_details', body={
@@ -255,6 +263,8 @@ def delete_user(user_id):
                     }
                 }
             })
+            if es_status.status(remove_user_from_user_detail) != "Successfully done!":
+                return "No error"
             remove_user_from_auth = es.delete_by_query(index='kepler_auth', body={
                 "query": {
                     "bool": {
@@ -268,6 +278,8 @@ def delete_user(user_id):
                     }
                 }
             })
+            if es_status.status(remove_user_from_auth) != "Successfully done!":
+                return "No error"
             print(remove_user_from_user_detail)
             print("###########################")
             print("###########################")
@@ -299,6 +311,8 @@ def get_user_id(email):
                 }
             }
         })
+        if es_status.status(fetch_user_id) != "Successfully done!":
+            return "No error"
         retrieved_user_id = fetch_user_id.get('hits').get('hits')
 
         if len(retrieved_user_id != 0):
